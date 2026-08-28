@@ -2,9 +2,9 @@ name: Build Updated Expansion ROM
 
 on:
   push:
-    branches: [ "*" ]
+    branches: [ master ]
   pull_request:
-    branches: [ "*" ]
+    branches: [ master ]
 
 jobs:
   build:
@@ -16,7 +16,7 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install System & DevkitPro Dependencies
+      - name: Install System Dependencies
         run: |
           sudo apt-get update && sudo apt-get install -y --no-install-recommends \
             build-essential \
@@ -25,19 +25,27 @@ jobs:
             git \
             python3 \
             wget \
-            gdebi-core
+            curl
 
-          # Install devkitPro pacman repository keyring
-          sudo wget https://apt.devkitpro.org/devkitpro-keyring.deb
-          sudo dpkg -i devkitpro-keyring.deb
-          echo "deb https://apt.devkitpro.org stable main" | sudo tee /etc/apt/sources.list.d/devkitpro.list
-          sudo apt-get update
-
-          # Install devkitARM toolchain and general tools
-          sudo apt-get install -y --no-install-recommends \
-            devkitpro-keyring \
-            base-devkit-env \
-            gba-dev
+      - name: Setup devkitARM via GitHub Releases
+        run: |
+          sudo mkdir -p /opt/devkitpro/devkitARM
+          
+          # Download and extract the latest devkitARM release package directly
+          REL_URL=$(curl -s https://api.github.com/repos/devkitPro/devkitARM-releases/releases/latest | grep "browser_download_url.*tar.xz" | cut -d '"' -f 4 | head -n 1)
+          if [ -z "$REL_URL" ]; then
+            # Fallback direct download link if API limit is hit
+            REL_URL="https://github.com/devkitPro/devkitARM-releases/releases/download/r54-1/devkitARM-r54-1-linux.tar.xz"
+          fi
+          
+          wget -q "$REL_URL" -O devkitarm.tar.xz
+          sudo tar -xf devkitarm.tar.xz -C /opt/devkitpro/
+          
+          # Ensure uniform directory naming
+          if [ -d "/opt/devkitpro/devkitARM" ] && [ ! "$(ls -A /opt/devkitpro/devkitARM)" ]; then
+            sudo rm -rf /opt/devkitpro/devkitARM
+            sudo mv /opt/devkitpro/devkitarm /opt/devkitpro/devkitARM || true
+          fi
 
       - name: Set Environment Variables
         run: |

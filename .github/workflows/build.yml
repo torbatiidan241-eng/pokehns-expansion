@@ -25,18 +25,15 @@ jobs:
             git \
             python3 \
             wget \
-            curl \
-            gdebi-core
+            curl
 
-      - name: Setup devkitPro Toolchain via Official Installer
+      - name: Setup devkitPro Toolchain via Official Installer Script
         run: |
-          sudo dkp-install || {
-            wget https://kent.dl.sourceforge.net/project/devkitpro/devkitpro-pacman.installer.sh
-            chmod +x devkitpro-pacman.installer.sh
-            sudo ./devkitpro-pacman.installer.sh
-          }
+          wget https://apt.devkitpro.org/install-devkitpro-pacman
+          chmod +x ./install-devkitpro-pacman
+          sudo ./install-devkitpro-pacman
           
-          # Install the GBA development suite via dkp-pacman
+          # Install GBA development suite packages using dkp-pacman
           sudo dkp-pacman -Syu --noconfirm gba-dev
 
       - name: Set Environment Variables

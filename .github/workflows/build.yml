@@ -29,22 +29,17 @@ jobs:
 
       - name: Setup devkitARM via GitHub Releases
         run: |
-          sudo mkdir -p /opt/devkitpro/devkitARM
+          sudo mkdir -p /opt/devkitpro
           
-          # Download and extract the latest devkitARM release package directly
-          REL_URL=$(curl -s https://api.github.com/repos/devkitPro/devkitARM-releases/releases/latest | grep "browser_download_url.*tar.xz" | cut -d '"' -f 4 | head -n 1)
-          if [ -z "$REL_URL" ]; then
-            # Fallback direct download link if API limit is hit
-            REL_URL="https://github.com/devkitPro/devkitARM-releases/releases/download/r54-1/devkitARM-r54-1-linux.tar.xz"
-          fi
-          
+          # Download precompiled devkitARM package safely
+          REL_URL="https://github.com/devkitPro/devkitARM-releases/releases/download/r54-1/devkitARM-r54-1-linux.tar.xz"
           wget -q "$REL_URL" -O devkitarm.tar.xz
+          
           sudo tar -xf devkitarm.tar.xz -C /opt/devkitpro/
           
-          # Ensure uniform directory naming
-          if [ -d "/opt/devkitpro/devkitARM" ] && [ ! "$(ls -A /opt/devkitpro/devkitARM)" ]; then
-            sudo rm -rf /opt/devkitpro/devkitARM
-            sudo mv /opt/devkitpro/devkitarm /opt/devkitpro/devkitARM || true
+          # Handle directory naming variation if present
+          if [ -d "/opt/devkitpro/devkitarm" ] && [ ! -d "/opt/devkitpro/devkitARM" ]; then
+            sudo mv /opt/devkitpro/devkitarm /opt/devkitpro/devkitARM
           fi
 
       - name: Set Environment Variables

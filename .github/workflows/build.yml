@@ -25,7 +25,6 @@ jobs:
             git \
             python3 \
             wget \
-<<<<<<< HEAD
             curl
 
       - name: Setup devkitARM via GitHub Releases
@@ -53,13 +52,6 @@ jobs:
           echo "DEVKITPRO=/opt/devkitpro" >> $GITHUB_ENV
           echo "DEVKITARM=/opt/devkitpro/devkitARM" >> $GITHUB_ENV
           echo "/opt/devkitpro/devkitARM/bin" >> $GITHUB_PATH
-=======
-            curl \
-            gdebi-core
-
-      - name: Setup devkitPro Toolchain via GitHub Action
-        uses: devkitPro/actions/install@v3
->>>>>>> 7a2c9f52534365e246d0cc816e4eb384960e953a
 
       - name: Verify Tools and Environment
         run: |

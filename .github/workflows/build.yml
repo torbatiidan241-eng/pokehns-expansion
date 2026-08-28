@@ -26,22 +26,18 @@ jobs:
             python3 \
             wget \
             curl \
-            lsb-release \
-            software-properties-common \
-            gnupg
+            gdebi-core
 
-      - name: Setup devkitPro Repository & Toolchain
+      - name: Setup devkitPro Toolchain via Official Installer
         run: |
-          sudo mkdir -p /etc/apt/keyrings
-          curl -fsSL https://apt.devkitpro.org/devkitpro-keyring.gpg | sudo tee /etc/apt/keyrings/devkitpro-keyring.gpg > /dev/null
+          sudo dkp-install || {
+            wget https://kent.dl.sourceforge.net/project/devkitpro/devkitpro-pacman.installer.sh
+            chmod +x devkitpro-pacman.installer.sh
+            sudo ./devkitpro-pacman.installer.sh
+          }
           
-          echo "deb [signed-by=/etc/apt/keyrings/devkitpro-keyring.gpg] https://apt.devkitpro.org stable main" | sudo tee /etc/apt/sources.list.d/devkitpro.list
-          
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            devkitpro-keyring \
-            base-devkit-env \
-            gba-dev
+          # Install the GBA development suite via dkp-pacman
+          sudo dkp-pacman -Syu --noconfirm gba-dev
 
       - name: Set Environment Variables
         run: |

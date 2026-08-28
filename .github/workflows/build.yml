@@ -9,6 +9,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: devkitpro/devkitarm:latest
 
     steps:
       - name: Checkout Repository with Submodules
@@ -18,29 +20,12 @@ jobs:
 
       - name: Install System Dependencies
         run: |
-          sudo apt-get update && sudo apt-get install -y --no-install-recommends \
+          apt-get update && apt-get install -y --no-install-recommends \
             build-essential \
             libpng-dev \
             pkg-config \
             git \
-            python3 \
-            wget \
-            curl
-
-      - name: Setup devkitARM via GitHub Releases
-        run: |
-          sudo mkdir -p /opt/devkitpro
-          
-          # Download precompiled devkitARM package safely
-          REL_URL="https://github.com/devkitPro/devkitARM-releases/releases/download/r54-1/devkitARM-r54-1-linux.tar.xz"
-          wget -q "$REL_URL" -O devkitarm.tar.xz
-          
-          sudo tar -xf devkitarm.tar.xz -C /opt/devkitpro/
-          
-          # Handle directory naming variation if present
-          if [ -d "/opt/devkitpro/devkitarm" ] && [ ! -d "/opt/devkitpro/devkitARM" ]; then
-            sudo mv /opt/devkitpro/devkitarm /opt/devkitpro/devkitARM
-          fi
+            python3
 
       - name: Set Environment Variables
         run: |
@@ -50,11 +35,19 @@ jobs:
 
       - name: Verify Tools and Environment
         run: |
+          export DEVKITPRO=/opt/devkitpro
+          export DEVKITARM=${DEVKITPRO}/devkitARM
+          export PATH=${DEVKITARM}/bin:$PATH
+          
           arm-none-eabi-gcc --version
           python3 --version
 
       - name: Build Required Tools
         run: |
+          export DEVKITPRO=/opt/devkitpro
+          export DEVKITARM=${DEVKITPRO}/devkitARM
+          export PATH=${DEVKITARM}/bin:$PATH
+
           if [ -d "tools" ]; then
             make -C tools
           fi
@@ -67,6 +60,10 @@ jobs:
 
       - name: Compile ROM
         run: |
+          export DEVKITPRO=/opt/devkitpro
+          export DEVKITARM=${DEVKITPRO}/devkitARM
+          export PATH=${DEVKITARM}/bin:$PATH
+
           make -j$(nproc)
 
       - name: Archive Compiled ROM Artifact

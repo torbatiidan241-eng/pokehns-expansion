@@ -2,9 +2,9 @@ name: Build Updated Expansion ROM
 
 on:
   push:
-    branches: [ "*" ]
+    branches: [ master ]
   pull_request:
-    branches: [ "*" ]
+    branches: [ master ]
 
 jobs:
   build:
@@ -16,7 +16,7 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install System & DevkitPro Dependencies
+      - name: Install System Dependencies
         run: |
           sudo apt-get update && sudo apt-get install -y --no-install-recommends \
             build-essential \
@@ -25,15 +25,19 @@ jobs:
             git \
             python3 \
             wget \
-            gdebi-core
+            curl \
+            lsb-release \
+            software-properties-common \
+            gnupg
 
-          # Install devkitPro pacman repository keyring
-          sudo wget https://apt.devkitpro.org/devkitpro-keyring.deb
-          sudo dpkg -i devkitpro-keyring.deb
-          echo "deb https://apt.devkitpro.org stable main" | sudo tee /etc/apt/sources.list.d/devkitpro.list
+      - name: Setup devkitPro Repository & Toolchain
+        run: |
+          sudo mkdir -p /etc/apt/keyrings
+          curl -fsSL https://apt.devkitpro.org/devkitpro-keyring.gpg | sudo tee /etc/apt/keyrings/devkitpro-keyring.gpg > /dev/null
+          
+          echo "deb [signed-by=/etc/apt/keyrings/devkitpro-keyring.gpg] https://apt.devkitpro.org stable main" | sudo tee /etc/apt/sources.list.d/devkitpro.list
+          
           sudo apt-get update
-
-          # Install devkitARM toolchain and general tools
           sudo apt-get install -y --no-install-recommends \
             devkitpro-keyring \
             base-devkit-env \

@@ -1,4 +1,4 @@
-name: Build ROM
+name: Build Updated Expansion ROM
 
 on:
   push:
@@ -14,8 +14,10 @@ jobs:
       image: devkitpro/devkitarm:latest
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout Repository with Submodules
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Install System Dependencies
         run: |
@@ -24,12 +26,27 @@ jobs:
             libpng-dev \
             pkg-config \
             git \
-            python3
+            python3 \
+            wget
 
       - name: Verify Tools and Environment
         run: |
+          export DEVKITPRO=/opt/devkitpro
+          export DEVKITARM=${DEVKITPRO}/devkitarm
+          export PATH=${DEVKITARM}/bin:$PATH
+          
           arm-none-eabi-gcc --version
           python3 --version
+
+      - name: Build Required Tools
+        run: |
+          export DEVKITPRO=/opt/devkitpro
+          export DEVKITARM=${DEVKITPRO}/devkitarm
+          export PATH=${DEVKITARM}/bin:$PATH
+
+          if [ -d "tools" ]; then
+            make -C tools
+          fi
 
       - name: Run Pre-Build Patching (if required)
         run: |
@@ -39,10 +56,14 @@ jobs:
 
       - name: Compile ROM
         run: |
+          export DEVKITPRO=/opt/devkitpro
+          export DEVKITARM=${DEVKITPRO}/devkitarm
+          export PATH=${DEVKITARM}/bin:$PATH
+
           make -j$(nproc)
 
       - name: Archive Compiled ROM Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: poke-hns
+          name: poke-hns-updated
           path: poke-hns.gba

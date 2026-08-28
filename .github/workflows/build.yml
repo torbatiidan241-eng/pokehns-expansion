@@ -10,40 +10,48 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    container:
-      image: devkitpro/devkitarm:latest
-
     steps:
       - name: Checkout Repository with Submodules
         uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - name: Install System Dependencies
+      - name: Install System & DevkitPro Dependencies
         run: |
-          apt-get update && apt-get install -y --no-install-recommends \
+          sudo apt-get update && sudo apt-get install -y --no-install-recommends \
             build-essential \
             libpng-dev \
             pkg-config \
             git \
             python3 \
-            wget
+            wget \
+            gdebi-core
+
+          # Install devkitPro pacman repository keyring
+          sudo wget https://apt.devkitpro.org/devkitpro-keyring.deb
+          sudo dpkg -i devkitpro-keyring.deb
+          echo "deb https://apt.devkitpro.org stable main" | sudo tee /etc/apt/sources.list.d/devkitpro.list
+          sudo apt-get update
+
+          # Install devkitARM toolchain and general tools
+          sudo apt-get install -y --no-install-recommends \
+            devkitpro-keyring \
+            base-devkit-env \
+            gba-dev
+
+      - name: Set Environment Variables
+        run: |
+          echo "DEVKITPRO=/opt/devkitpro" >> $GITHUB_ENV
+          echo "DEVKITARM=/opt/devkitpro/devkitARM" >> $GITHUB_ENV
+          echo "/opt/devkitpro/devkitARM/bin" >> $GITHUB_PATH
 
       - name: Verify Tools and Environment
         run: |
-          export DEVKITPRO=/opt/devkitpro
-          export DEVKITARM=${DEVKITPRO}/devkitarm
-          export PATH=${DEVKITARM}/bin:$PATH
-          
           arm-none-eabi-gcc --version
           python3 --version
 
       - name: Build Required Tools
         run: |
-          export DEVKITPRO=/opt/devkitpro
-          export DEVKITARM=${DEVKITPRO}/devkitarm
-          export PATH=${DEVKITARM}/bin:$PATH
-
           if [ -d "tools" ]; then
             make -C tools
           fi
@@ -56,10 +64,6 @@ jobs:
 
       - name: Compile ROM
         run: |
-          export DEVKITPRO=/opt/devkitpro
-          export DEVKITARM=${DEVKITPRO}/devkitarm
-          export PATH=${DEVKITARM}/bin:$PATH
-
           make -j$(nproc)
 
       - name: Archive Compiled ROM Artifact

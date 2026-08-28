@@ -42,13 +42,13 @@ jobs:
           arm-none-eabi-gcc --version
           python3 --version
 
-      - name: Build Required Tools
+      - name: Build Required Tools (Conditional)
         run: |
           export DEVKITPRO=/opt/devkitpro
           export DEVKITARM=${DEVKITPRO}/devkitARM
           export PATH=${DEVKITARM}/bin:$PATH
 
-          if [ -d "tools" ]; then
+          if [ -d "tools" ] && [ -f "tools/Makefile" ]; then
             make -C tools
           fi
 

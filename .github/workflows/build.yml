@@ -1,89 +1,48 @@
-name: Build Updated Expansion ROM
+name: Build Pokémon HnS
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, main ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository with Submodules
+      - name: Check out repository
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
-      - name: Install System Dependencies
+      - name: Install Dependencies
         run: |
-          sudo apt-get update && sudo apt-get install -y --no-install-recommends \
-            build-essential \
-            libpng-dev \
-            pkg-config \
-            git \
-            python3 \
-            wget \
-<<<<<<< HEAD
-            curl
+          sudo apt-get update
+          sudo apt-get install -y build-essential libpng-dev libsdl2-dev git wget curl
 
-      - name: Setup devkitARM via GitHub Releases
+      - name: Downgrade GCC / Install GCC 11 & G++ 11
         run: |
-          sudo mkdir -p /opt/devkitpro/devkitARM
-          
-          # Download and extract the latest devkitARM release package directly
-          REL_URL=$(curl -s https://api.github.com/repos/devkitPro/devkitARM-releases/releases/latest | grep "browser_download_url.*tar.xz" | cut -d '"' -f 4 | head -n 1)
-          if [ -z "$REL_URL" ]; then
-            # Fallback direct download link if API limit is hit
-            REL_URL="https://github.com/devkitPro/devkitARM-releases/releases/download/r54-1/devkitARM-r54-1-linux.tar.xz"
-          fi
-          
-          wget -q "$REL_URL" -O devkitarm.tar.xz
-          sudo tar -xf devkitarm.tar.xz -C /opt/devkitpro/
-          
-          # Ensure uniform directory naming
-          if [ -d "/opt/devkitpro/devkitARM" ] && [ ! "$(ls -A /opt/devkitpro/devkitARM)" ]; then
-            sudo rm -rf /opt/devkitpro/devkitARM
-            sudo mv /opt/devkitpro/devkitarm /opt/devkitpro/devkitARM || true
-          fi
+          sudo apt-get install -y gcc-11 g++-11
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 100
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 100
+          gcc --version
 
-      - name: Set Environment Variables
+      - name: Install ARM Embedded Toolchain
         run: |
-          echo "DEVKITPRO=/opt/devkitpro" >> $GITHUB_ENV
-          echo "DEVKITARM=/opt/devkitpro/devkitARM" >> $GITHUB_ENV
-          echo "/opt/devkitpro/devkitARM/bin" >> $GITHUB_PATH
-=======
-            curl \
-            gdebi-core
+          wget https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
+          tar -xf gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
+          sudo mv gcc-arm-none-eabi-10.3-2021.10 /opt/gcc-arm-none-eabi
+          echo "/opt/gcc-arm-none-eabi/bin" >> $GITHUB_PATH
 
-      - name: Setup devkitPro Toolchain via GitHub Action
-        uses: devkitPro/actions/install@v3
->>>>>>> 7a2c9f52534365e246d0cc816e4eb384960e953a
-
-      - name: Verify Tools and Environment
+      - name: Verify Toolchain
         run: |
           arm-none-eabi-gcc --version
-          python3 --version
 
-      - name: Build Required Tools
+      - name: Build ROM
         run: |
-          if [ -d "tools" ]; then
-            make -C tools
-          fi
+          make hns -j$(nproc)
 
-      - name: Run Pre-Build Patching (if required)
-        run: |
-          if [ -f "tools/map_section_patcher.py" ]; then
-            python3 tools/map_section_patcher.py
-          fi
-
-      - name: Compile ROM
-        run: |
-          make -j$(nproc)
-
-      - name: Archive Compiled ROM Artifact
+      - name: Upload ROM Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: poke-hns-updated
-          path: poke-hns.gba
+          name: pokehns-gba
+          path: pokehns.gba

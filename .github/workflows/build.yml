@@ -9,8 +9,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container:
-      image: devkitpro/devkitarm:latest
 
     steps:
       - name: Check out repository
@@ -18,7 +16,6 @@ jobs:
 
       - name: Install Dependencies
         run: |
-<<<<<<< HEAD
           sudo apt-get update
           sudo apt-get install -y build-essential libpng-dev libsdl2-dev git wget curl
 
@@ -28,71 +25,23 @@ jobs:
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 100
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 100
           gcc --version
-=======
-          apt-get update && apt-get install -y --no-install-recommends \
-            build-essential \
-            libpng-dev \
-            pkg-config \
-            git \
-            python3
->>>>>>> f1fc9a7b5bcb13b4ab506b589fc29bd1fe30032e
 
       - name: Install ARM Embedded Toolchain
         run: |
-<<<<<<< HEAD
           wget https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
           tar -xf gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
           sudo mv gcc-arm-none-eabi-10.3-2021.10 /opt/gcc-arm-none-eabi
           echo "/opt/gcc-arm-none-eabi/bin" >> $GITHUB_PATH
 
       - name: Verify Toolchain
-=======
-          echo "DEVKITPRO=/opt/devkitpro" >> $GITHUB_ENV
-          echo "DEVKITARM=/opt/devkitpro/devkitARM" >> $GITHUB_ENV
-          echo "/opt/devkitpro/devkitARM/bin" >> $GITHUB_PATH
-
-      - name: Verify Tools and Environment
->>>>>>> f1fc9a7b5bcb13b4ab506b589fc29bd1fe30032e
         run: |
-          export DEVKITPRO=/opt/devkitpro
-          export DEVKITARM=${DEVKITPRO}/devkitARM
-          export PATH=${DEVKITARM}/bin:$PATH
-          
           arm-none-eabi-gcc --version
 
-<<<<<<< HEAD
       - name: Build ROM
         run: |
           make hns -j$(nproc)
 
       - name: Upload ROM Artifact
-=======
-      - name: Build Required Tools (Conditional)
-        run: |
-          export DEVKITPRO=/opt/devkitpro
-          export DEVKITARM=${DEVKITPRO}/devkitARM
-          export PATH=${DEVKITARM}/bin:$PATH
-
-          if [ -d "tools" ] && [ -f "tools/Makefile" ]; then
-            make -C tools
-          fi
-
-      - name: Run Pre-Build Patching (if required)
-        run: |
-          if [ -f "tools/map_section_patcher.py" ]; then
-            python3 tools/map_section_patcher.py
-          fi
-
-      - name: Compile ROM
-        run: |
-          export DEVKITPRO=/opt/devkitpro
-          export DEVKITARM=${DEVKITPRO}/devkitARM
-          export PATH=${DEVKITARM}/bin:$PATH
-
-          make -j$(nproc)
-
-      - name: Archive Compiled ROM Artifact
->>>>>>> f1fc9a7b5bcb13b4ab506b589fc29bd1fe30032e
         uses: actions/upload-artifact@v4
         with:
           name: pokehns-gba

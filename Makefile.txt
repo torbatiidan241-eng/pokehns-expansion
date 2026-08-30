@@ -420,21 +420,20 @@ generated: $(AUTO_GEN_TARGETS)
 %.pal: ;
 %.wav: ;
 
-# Fallback path mapping rules to handle root graphics/bag/ paths if subdirectories are removed
 %.1bpp:     %.png
-	@if [ -f $< ]; then $(GFX) $< $@; elif [ -f graphics/bag/$(notdir $<) ]; then $(GFX) graphics/bag/$(notdir $<) $@; else $(GFX) $< $@; fi
+	@if [ -f graphics/bag/$(notdir $<) ]; then $(GFX) graphics/bag/$(notdir $<) $@; else $(GFX) $< $@; fi
 
 %.4bpp:     %.png
-	@if [ -f $< ]; then $(GFX) $< $@; elif [ -f graphics/bag/$(notdir $<) ]; then $(GFX) graphics/bag/$(notdir $<) $@; else $(GFX) $< $@; fi
+	@if [ -f graphics/bag/$(notdir $<) ]; then $(GFX) graphics/bag/$(notdir $<) $@; else $(GFX) $< $@; fi
 
 %.8bpp:     %.png
-	@if [ -f $< ]; then $(GFX) $< $@; elif [ -f graphics/bag/$(notdir $<) ]; then $(GFX) graphics/bag/$(notdir $<) $@; else $(GFX) $< $@; fi
+	@if [ -f graphics/bag/$(notdir $<) ]; then $(GFX) graphics/bag/$(notdir $<) $@; else $(GFX) $< $@; fi
 
 %.gbapal:   %.pal
-	@if [ -f $< ]; then $(GFX) $< $@; elif [ -f graphics/bag/$(notdir $<) ]; then $(GFX) graphics/bag/$(notdir $<) $@; else $(GFX) $< $@; fi
+	@if [ -f graphics/bag/$(notdir $<) ]; then $(GFX) graphics/bag/$(notdir $<) $@; else $(GFX) $< $@; fi
 
 %.gbapal:   %.png
-	@if [ -f $< ]; then $(GFX) $< $@; elif [ -f graphics/bag/$(notdir $<) ]; then $(GFX) graphics/bag/$(notdir $<) $@; else $(GFX) $< $@; fi
+	@if [ -f graphics/bag/$(notdir $<) ]; then $(GFX) graphics/bag/$(notdir $<) $@; else $(GFX) $< $@; fi
 
 %.lz:       %      ; $(GFX) $< $@
 %.smolTM:   %      ; $(SMOLTM) $< $@

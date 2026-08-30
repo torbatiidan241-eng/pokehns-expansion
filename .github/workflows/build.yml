@@ -43,9 +43,12 @@ jobs:
         run: |
           arm-none-eabi-gcc --version
 
-      - name: Build ROM
+      - name: Generate Map Headers and Assets
         run: |
           make generated MAP_VERSION=hns
+
+      - name: Build ROM
+        run: |
           make hns -j$(nproc)
 
       - name: Upload ROM Artifact

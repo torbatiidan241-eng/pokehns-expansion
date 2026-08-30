@@ -45,6 +45,7 @@ jobs:
 
       - name: Build ROM
         run: |
+          make generated MAP_VERSION=hns
           make hns -j$(nproc)
 
       - name: Upload ROM Artifact

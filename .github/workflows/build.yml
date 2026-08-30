@@ -39,8 +39,7 @@ jobs:
 
       - name: Build ROM
         run: |
-          make hns -j$(nproc)
-
+          make BUILD=hns -j$(nproc)
       - name: Upload ROM Artifact
         uses: actions/upload-artifact@v4
         with:

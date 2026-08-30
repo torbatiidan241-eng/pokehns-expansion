@@ -709,3 +709,11 @@ $(SPINDAGFXDIR)/spot_2.1bpp: %.1bpp: %.png
 
 $(SPINDAGFXDIR)/spot_3.1bpp: %.1bpp: %.png
 	$(GFX) $< $@ -plain -data_width 2
+
+### Bag Graphics Overrides (Forced to root graphics/bag) ###
+
+graphics/bag/bag.gbapal: graphics/bag/bag.pal
+	$(GFX) $< $@
+
+graphics/bag/bag_female.4bpp: graphics/bag/bag_female.png
+	$(GFX) $< $@
